@@ -1,3 +1,6 @@
+// TODO: use 'request' module in place of fetch
+// for low-latency streaming
+
 require('dotenv-safe').load();
 
 const fs = require('fs');
