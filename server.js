@@ -122,8 +122,9 @@ app.get('/api/owned-games', (req, res) => {
       steamId: steamIdsToFetch[index]
     }));
     compileOwnedGames(ownedGamesCollections);
+    const { apps } = store.getState().ownedGamesData;
     res.json({
-      games: store.getState().ownedGamesData.apps
+      games: Object.keys(apps).map(appId => apps[appId])
     }).end();
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
