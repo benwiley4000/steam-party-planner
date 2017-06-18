@@ -201,11 +201,16 @@ app.delete('/api/players/:vanityName', (req, res) => {
       }).end();
       return;
     }
-    deleteSteamId(steamid, (err) => {
+    clearOwnedGames((err) => {
       if (err) {
         throw err;
       }
-      res.status(204).end();
+      deleteSteamId(steamid, (err) => {
+        if (err) {
+          throw err;
+        }
+        res.status(204).end();
+      });
     });
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
