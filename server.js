@@ -134,13 +134,16 @@ app.get('/api/owned-games', (req, res) => {
       games: r.games,
       steamId: steamIdsToFetch[index]
     }));
-    compileOwnedGames(ownedGamesCollections, (err) => {
-      if (err) {
-        throw err;
-      }
-      res.json({
-        games: ownedGamesData.apps
-      }).end();
+    return new Promise((resolve, reject) => {
+      compileOwnedGames(ownedGamesCollections, (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        res.json({
+          games: ownedGamesData.apps
+        }).end();
+      });
     });
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
@@ -164,14 +167,17 @@ app.post('/api/register/:vanityName', (req, res) => {
       }).end();
       return;
     }
-    saveSteamIdPendingConfirmation(player.steamid, (err, token) => {
-      if (err) {
-        throw err;
-      }
-      res.json({
-        player,
-        confirmationUrl: `/api/confirm-register/${token}`
-      }).end();
+    return new Promise((resolve, reject) => {
+      saveSteamIdPendingConfirmation(player.steamid, (err, token) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        res.json({
+          player,
+          confirmationUrl: `/api/confirm-register/${token}`
+        }).end();
+      });
     });
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
@@ -201,15 +207,19 @@ app.delete('/api/players/:vanityName', (req, res) => {
       }).end();
       return;
     }
-    clearOwnedGames((err) => {
-      if (err) {
-        throw err;
-      }
-      deleteSteamId(steamid, (err) => {
+    return new Promise((resolve, reject) => {
+      clearOwnedGames((err) => {
         if (err) {
-          throw err;
+          reject(err);
+          return;
         }
-        res.status(204).end();
+        deleteSteamId(steamid, (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          res.status(204).end();
+        });
       });
     });
   }).catch(() => {
