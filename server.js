@@ -12,13 +12,27 @@ const fetch = require('node-fetch');
 
 const resolveVanityName = require('./lib/steam-api/resolveVanityName');
 const getPlayerSummaries = require('./lib/steam-api/getPlayerSummaries');
+const getOwnedGames = require('./lib/steam-api/getOwnedGames');
 
 const steamIdsPath = './steamids.json';
+const defaultSteamIds = [];
 let steamIds;
 try {
   steamIds = require(steamIdsPath);
 } catch (e) {
-  steamIds = [];
+  steamIds = defaultSteamIds;
+}
+
+const ownedGamesDataPath = './ownedgamesdata.json';
+const defaultOwnedGamesData = {
+  includedSteamIds: [],
+  apps: {}
+};
+let ownedGamesData;
+try {
+  ownedGamesData = require(ownedGamesDataPath);
+} catch (e) {
+  ownedGamesData = defaultOwnedGamesData;
 }
 
 function saveSteamId (id, callback) {
@@ -38,6 +52,31 @@ function deleteSteamId (id, callback) {
   }
   steamIds.splice(index, 1);
   fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
+}
+
+function compileOwnedGames (ownedGamesCollections, callback) {
+  for (const { steamId, games } of ownedGamesCollections) {
+    ownedGamesData.includedSteamIds.push(steamId);
+    if (!games) {
+      continue;
+    }
+    for (const game of games) {
+      if (game.appid in ownedGamesData.apps) {
+        ownedGamesData.apps[game.appid].playtime_forever += game.playtime_forever;
+        ownedGamesData.apps[game.appid].steam_ids.push(steamId);
+      } else {
+        ownedGamesData.apps[game.appid] = Object.assign({}, game, {
+          steam_ids: [steamId]
+        });
+      }
+    }
+  }
+  fs.writeFile(ownedGamesDataPath, JSON.stringify(ownedGamesData), callback);
+}
+
+function clearOwnedGames (callback) {
+  ownedGamesData = defaultOwnedGamesData;
+  fs.writeFile(ownedGamesDataPath, JSON.stringify(ownedGamesData), callback);
 }
 
 const steamIdsPendingConfirmation = {};
@@ -61,9 +100,48 @@ const app = express();
 app.use(compress());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/api/registered-players', (req, res) => {
+app.get('/api/players', (req, res) => {
   getPlayerSummaries(steamIds).then(({ players: { player: players } }) => {
     res.json({ players }).end();
+  }).catch(() => {
+    res.status(500).json({ error: 'Server error' }).end();
+  });
+});
+
+app.get('/api/players/:steamId', (req, res) => {
+  getPlayerSummaries([
+    req.params.steamId
+  ]).then(({ players: { player: players } }) => {
+    const player = players[0];
+    if (!player) {
+      res.status(400).json({
+        error: `Player with id ${req.params.steamId} not found`
+      }).end();
+      return;
+    }
+    res.json({ player }).end();
+  }).catch(() => {
+    res.status(500).json({ error: 'Server error' }).end();
+  });
+});
+
+app.get('/api/owned-games', (req, res) => {
+  const steamIdsToFetch = steamIds.filter(id => {
+    return !ownedGamesData.includedSteamIds.includes(id);
+  });
+  Promise.all(steamIdsToFetch.map(getOwnedGames)).then(responses => {
+    const ownedGamesCollections = responses.map((r, index) => ({
+      games: r.games,
+      steamId: steamIdsToFetch[index]
+    }));
+    compileOwnedGames(ownedGamesCollections, (err) => {
+      if (err) {
+        throw err;
+      }
+      res.json({
+        games: ownedGamesData.apps
+      }).end();
+    });
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
   });
