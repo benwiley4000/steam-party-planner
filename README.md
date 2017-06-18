@@ -1,4 +1,4 @@
-# steam-game-picker
+# steam-party-planner
 
 An app for tracking a pool of Steam user accounts and compiling data about games held in common between them. Built on top of the Steam Web API.
 

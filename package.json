@@ -1,5 +1,5 @@
 {
-  "name": "steam-game-picker",
+  "name": "steam-party-planner",
   "version": "0.1.0",
   "description": "Track a pool of Steam users and find games in common",
   "main": "server.js",
@@ -10,6 +10,7 @@
     "steam",
     "game",
     "games",
+    "party",
     "social",
     "gaming"
   ],
@@ -27,10 +28,10 @@
   "devDependencies": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/benwiley4000/steam-game-picker.git"
+    "url": "git+https://github.com/benwiley4000/steam-party-planner.git"
   },
   "bugs": {
-    "url": "https://github.com/benwiley4000/steam-game-picker/issues"
+    "url": "https://github.com/benwiley4000/steam-party-planner/issues"
   },
-  "homepage": "https://github.com/benwiley4000/steam-game-picker#readme"
+  "homepage": "https://github.com/benwiley4000/steam-party-planner#readme"
 }
