@@ -200,6 +200,10 @@ app.post('/api/confirm-register/:token', (req, res) => {
 });
 
 app.delete('/api/players/:vanityName', (req, res) => {
+  if (process.env.ENABLE_PLAYER_DELETE !== 'true') {
+    res.status(403).json({ error: 'Method not allowed' }).end();
+    return;
+  }
   resolveVanityName(req.params.vanityName).then(({ success, steamid }) => {
     if (success !== 1) {
       res.status(400).json({
