@@ -28,6 +28,8 @@ try {
   /* if the data is missing, the default is fine */
 }
 
+setTimeout(clearOwnedGames); // set default and cache expiry countdown
+
 function dispatchSteamIdAction (actionCreator, id, callback) {
   const oldSteamIds = store.getState().steamIds;
   store.dispatch(actionCreator(id));
@@ -53,8 +55,14 @@ function compileOwnedGames (ownedGamesCollections) {
   }
 }
 
+let clearCacheTimeout;
 function clearOwnedGames () {
+  clearTimeout(clearCacheTimeout);
   store.dispatch(actions.clearOwnedGames());
+  clearCacheTimeout = setTimeout(
+    clearOwnedGames,
+    process.env.CACHE_EXPIRATION_TIMEOUT
+  );
 }
 
 function saveSteamIdPendingConfirmation (steamId, callback) {
