@@ -130,7 +130,7 @@ app.get('/api/owned-games', (req, res) => {
   });
 });
 
-app.post('/api/register/:vanityName', (req, res) => {
+app.post('/api/players/:vanityName', (req, res) => {
   resolveVanityName(req.params.vanityName).then(({ success, steamid }) => {
     if (success !== 1) {
       res.status(400).json({
@@ -155,7 +155,7 @@ app.post('/api/register/:vanityName', (req, res) => {
         }
         res.json({
           player,
-          confirmationUrl: `/api/confirm-register/${token}`
+          confirmationUrl: `/api/confirm-player/${token}`
         }).end();
       });
     });
@@ -164,7 +164,7 @@ app.post('/api/register/:vanityName', (req, res) => {
   });
 });
 
-app.post('/api/confirm-register/:token', (req, res) => {
+app.post('/api/confirm-player/:token', (req, res) => {
   const steamId = store.getState().steamIdsPendingConfirmation[req.params.token];
   if (!steamId) {
     res.status(410).json({ error: 'Confirmation url expired' }).end();

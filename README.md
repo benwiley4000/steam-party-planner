@@ -35,18 +35,18 @@ Returns summary data for the player matching the given `steamId`.
 
 Returns data for each game owned by one or more tracked players, including a list of steamIds corresponding to users who own each game.
 
-### POST `/api/register/:vanityName`
+### POST `/api/players/:vanityName`
 
-Looks up a user by community display name (not necessarily the same as login) and stages them for tracking.
+Looks up a player by community display name (not necessarily the same as login) and stages them for tracking.
 
 Returns summary data for the player as well as a confirmation url.
 
-### POST `/api/confirm-register/:token`
+### POST `/api/confirm-player/:token`
 
-Confirms user registration with a unique token which expires are `process.env.STEAM_ID_CONFIRMATION_TIMEOUT` milliseconds.
+Confirms player registration with a unique token which expires after `process.env.STEAM_ID_CONFIRMATION_TIMEOUT` milliseconds.
 
 Shouldn't be composed manually, since this gets returned by `/api/register/:vanityName`.
 
 ### DELETE `/api/players/:vanityName`
 
-Deletes a user from tracking. Only enabled if `process.env.ENABLE_PLAYER_DELETE` is "true".
+Deletes a player from tracking. Only enabled if `process.env.ENABLE_PLAYER_DELETE` is "true".
