@@ -39,7 +39,7 @@ Returns data for each game owned by one or more tracked players, including a lis
 
 Looks up a user by community display name (not necessarily the same as login) and stages them for tracking.
 
-Returns summary data for the player as well as a confirmation url
+Returns summary data for the player as well as a confirmation url.
 
 ### POST `/api/confirm-register/:token`
 
