@@ -30,6 +30,16 @@ function saveSteamId (id, callback) {
   fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
 }
 
+function deleteSteamId (id, callback) {
+  const index = steamIds.indexOf(id);
+  if (index === -1) {
+    callback(); // no-op, but no need to return an error at this stage
+    return;
+  }
+  steamIds.splice(index, 1);
+  fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
+}
+
 const steamIdsPendingConfirmation = {};
 
 function saveSteamIdPendingConfirmation (steamId, callback) {
@@ -101,7 +111,26 @@ app.post('/api/confirm-register/:token', (req, res) => {
       res.status(500).json({ error: 'Server error' }).end();
       return;
     }
-    res.end();
+    res.status(204).end();
+  });
+});
+
+app.delete('/api/players/:vanityName', (req, res) => {
+  resolveVanityName(req.params.vanityName).then(({ success, steamid }) => {
+    if (success !== 1) {
+      res.status(400).json({
+        error: `Vanity name ${req.params.vanityName} not found`
+      }).end();
+      return;
+    }
+    deleteSteamId(steamid, (err) => {
+      if (err) {
+        throw err;
+      }
+      res.status(204).end();
+    });
+  }).catch(() => {
+    res.status(500).json({ error: 'Server error' }).end();
   });
 });
 
