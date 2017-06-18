@@ -23,5 +23,14 @@
   },
   "engines": {
     "node": ">=6.0.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benwiley4000/steam-game-picker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/benwiley4000/steam-game-picker/issues"
+  },
+  "homepage": "https://github.com/benwiley4000/steam-game-picker#readme"
 }
