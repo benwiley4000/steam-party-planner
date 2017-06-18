@@ -1,0 +1,16 @@
+{
+  "name": "steam-game-picker",
+  "version": "0.1.0",
+  "description": "Register a pool of Steam users and find games in common",
+  "main": "start.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "steam",
+    "game",
+    "games"
+  ],
+  "author": "Ben Wiley",
+  "license": "MIT"
+}
