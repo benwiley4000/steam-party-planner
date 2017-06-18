@@ -20,7 +20,8 @@
     "compression": "^1.6.2",
     "dotenv-safe": "^4.0.4",
     "express": "^4.15.3",
-    "node-fetch": "^1.7.1"
+    "node-fetch": "^1.7.1",
+    "redux": "^3.7.0"
   },
   "engines": {
     "node": ">=6.0.0"
