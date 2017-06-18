@@ -4,7 +4,7 @@
   "description": "Register a pool of Steam users and find games in common",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "keywords": [
     "steam",
