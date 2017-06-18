@@ -74,7 +74,7 @@ function saveSteamIdPendingConfirmation (steamId, callback) {
     const token = buffer.toString('hex');
     store.dispatch(actions.saveSteamIdPendingConfirmation(steamId, token));
     setTimeout(() => {
-      store.dispatch(expireSteamIdPendingConfirmation(token));
+      store.dispatch(action.expireSteamIdPendingConfirmation(token));
     }, process.env.STEAM_ID_CONFIRMATION_TIMEOUT);
     callback(null, token);
   });
