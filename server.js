@@ -3,74 +3,59 @@
 
 require('dotenv-safe').load();
 
+const path = require('path');
+const createStore = require('redux').createStore;
 const fs = require('fs');
 const crypto = require('crypto');
 const express = require('express');
 const compress = require('compression');
-const path = require('path');
 const fetch = require('node-fetch');
 
 const resolveVanityName = require('./lib/steam-api/resolveVanityName');
 const getPlayerSummaries = require('./lib/steam-api/getPlayerSummaries');
 const getOwnedGames = require('./lib/steam-api/getOwnedGames');
+const reducer = require('./lib/store/reducer');
+const actions = require('./lib/store/actions');
 
-const steamIdsPath = './steamids.json';
-let steamIds;
+const store = createStore(reducer);
+
+const steamIdsPath = path.join(__dirname, 'steamids.json');
+
 try {
-  steamIds = require(steamIdsPath);
+  const steamIds = require(steamIdsPath);
+  store.dispatch(actions.setSteamIds(steamIds));
 } catch (e) {
-  steamIds = [];
+  /* if the data is missing, the default is fine */
 }
 
-const defaultOwnedGamesData = {
-  includedSteamIds: [],
-  apps: {}
-};
-let ownedGamesData = defaultOwnedGamesData;
-
-function saveSteamId (id, callback) {
-  if (steamIds.indexOf(id) !== -1) {
+function dispatchSteamIdAction (actionCreator, id, callback) {
+  const oldSteamIds = store.getState().steamIds;
+  store.dispatch(actionCreator(id));
+  const { steamIds } = store.getState();
+  if (oldSteamIds === steamIds) {
     callback(); // no-op, but no need to return an error at this stage
     return;
   }
-  steamIds.push(id);
   fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
+}
+
+function saveSteamId (id, callback) {
+  dispatchSteamIdAction(actions.saveSteamId, id, callback);
 }
 
 function deleteSteamId (id, callback) {
-  const index = steamIds.indexOf(id);
-  if (index === -1) {
-    callback(); // no-op, but no need to return an error at this stage
-    return;
-  }
-  steamIds.splice(index, 1);
-  fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
+  dispatchSteamIdAction(actions.deleteSteamId, id, callback);
 }
 
 function compileOwnedGames (ownedGamesCollections) {
   for (const { steamId, games } of ownedGamesCollections) {
-    ownedGamesData.includedSteamIds.push(steamId);
-    if (!games) {
-      continue;
-    }
-    for (const game of games) {
-      if (game.appid in ownedGamesData.apps) {
-        ownedGamesData.apps[game.appid].playtime_forever += game.playtime_forever;
-        ownedGamesData.apps[game.appid].steam_ids.push(steamId);
-      } else {
-        ownedGamesData.apps[game.appid] = Object.assign({}, game, {
-          steam_ids: [steamId]
-        });
-      }
-    }
+    store.dispatch(actions.addOwnedGamesCollection(steamId, games));
   }
 }
 
 function clearOwnedGames () {
-  ownedGamesData = defaultOwnedGamesData;
+  store.dispatch(actions.clearOwnedGames());
 }
-
-const steamIdsPendingConfirmation = {};
 
 function saveSteamIdPendingConfirmation (steamId, callback) {
   crypto.randomBytes(8, (err, buffer) => {
@@ -79,9 +64,9 @@ function saveSteamIdPendingConfirmation (steamId, callback) {
       return;
     }
     const token = buffer.toString('hex');
-    steamIdsPendingConfirmation[token] = steamId;
+    store.dispatch(actions.saveSteamIdPendingConfirmation(steamId, token));
     setTimeout(() => {
-      delete steamIdsPendingConfirmation[token];
+      store.dispatch(expireSteamIdPendingConfirmation(token));
     }, process.env.STEAM_ID_CONFIRMATION_TIMEOUT);
     callback(null, token);
   });
@@ -92,6 +77,7 @@ app.use(compress());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/players', (req, res) => {
+  const { steamIds } = store.getState();
   getPlayerSummaries(steamIds).then(({ players: { player: players } }) => {
     res.json({ players }).end();
   }).catch(() => {
@@ -117,7 +103,9 @@ app.get('/api/players/:steamId', (req, res) => {
 });
 
 app.get('/api/owned-games', (req, res) => {
-  const steamIdsToFetch = steamIds.filter(id => {
+  const state = store.getState();
+  const ownedGamesData = state.ownedGamesData;
+  const steamIdsToFetch = state.steamIds.filter(id => {
     return !ownedGamesData.includedSteamIds.includes(id);
   });
   Promise.all(steamIdsToFetch.map(getOwnedGames)).then(responses => {
@@ -127,7 +115,7 @@ app.get('/api/owned-games', (req, res) => {
     }));
     compileOwnedGames(ownedGamesCollections);
     res.json({
-      games: ownedGamesData.apps
+      games: store.getState().ownedGamesData.apps
     }).end();
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
@@ -169,7 +157,7 @@ app.post('/api/register/:vanityName', (req, res) => {
 });
 
 app.post('/api/confirm-register/:token', (req, res) => {
-  const steamId = steamIdsPendingConfirmation[req.params.token];
+  const steamId = store.getState().steamIdsPendingConfirmation[req.params.token];
   if (!steamId) {
     res.status(410).json({ error: 'Confirmation url expired' }).end();
     return;
