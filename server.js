@@ -15,25 +15,18 @@ const getPlayerSummaries = require('./lib/steam-api/getPlayerSummaries');
 const getOwnedGames = require('./lib/steam-api/getOwnedGames');
 
 const steamIdsPath = './steamids.json';
-const defaultSteamIds = [];
 let steamIds;
 try {
   steamIds = require(steamIdsPath);
 } catch (e) {
-  steamIds = defaultSteamIds;
+  steamIds = [];
 }
 
-const ownedGamesDataPath = './ownedgamesdata.json';
 const defaultOwnedGamesData = {
   includedSteamIds: [],
   apps: {}
 };
-let ownedGamesData;
-try {
-  ownedGamesData = require(ownedGamesDataPath);
-} catch (e) {
-  ownedGamesData = defaultOwnedGamesData;
-}
+let ownedGamesData = defaultOwnedGamesData;
 
 function saveSteamId (id, callback) {
   if (steamIds.indexOf(id) !== -1) {
@@ -54,7 +47,7 @@ function deleteSteamId (id, callback) {
   fs.writeFile(steamIdsPath, JSON.stringify(steamIds), callback);
 }
 
-function compileOwnedGames (ownedGamesCollections, callback) {
+function compileOwnedGames (ownedGamesCollections) {
   for (const { steamId, games } of ownedGamesCollections) {
     ownedGamesData.includedSteamIds.push(steamId);
     if (!games) {
@@ -71,12 +64,10 @@ function compileOwnedGames (ownedGamesCollections, callback) {
       }
     }
   }
-  fs.writeFile(ownedGamesDataPath, JSON.stringify(ownedGamesData), callback);
 }
 
-function clearOwnedGames (callback) {
+function clearOwnedGames () {
   ownedGamesData = defaultOwnedGamesData;
-  fs.writeFile(ownedGamesDataPath, JSON.stringify(ownedGamesData), callback);
 }
 
 const steamIdsPendingConfirmation = {};
@@ -134,17 +125,10 @@ app.get('/api/owned-games', (req, res) => {
       games: r.games,
       steamId: steamIdsToFetch[index]
     }));
-    return new Promise((resolve, reject) => {
-      compileOwnedGames(ownedGamesCollections, (err) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        res.json({
-          games: ownedGamesData.apps
-        }).end();
-      });
-    });
+    compileOwnedGames(ownedGamesCollections);
+    res.json({
+      games: ownedGamesData.apps
+    }).end();
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
   });
@@ -211,19 +195,14 @@ app.delete('/api/players/:vanityName', (req, res) => {
       }).end();
       return;
     }
+    clearOwnedGames();
     return new Promise((resolve, reject) => {
-      clearOwnedGames((err) => {
+      deleteSteamId(steamid, (err) => {
         if (err) {
           reject(err);
           return;
         }
-        deleteSteamId(steamid, (err) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          res.status(204).end();
-        });
+        res.status(204).end();
       });
     });
   }).catch(() => {
