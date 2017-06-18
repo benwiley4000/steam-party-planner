@@ -2,7 +2,7 @@
   "name": "steam-game-picker",
   "version": "0.1.0",
   "description": "Register a pool of Steam users and find games in common",
-  "main": "start.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,5 +12,14 @@
     "games"
   ],
   "author": "Ben Wiley",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "compression": "^1.6.2",
+    "dotenv-safe": "^4.0.4",
+    "express": "^4.15.3",
+    "node-fetch": "^1.7.1"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  }
 }
