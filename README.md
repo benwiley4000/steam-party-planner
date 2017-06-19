@@ -1,6 +1,8 @@
 # steam-party-planner
 
-An app for tracking a pool of Steam user accounts and compiling data about games held in common between them. Built on top of the Steam Web API.
+A web app for tracking a pool of Steam user accounts and compiling data about games held in common between them. Built on top of the Steam Web API.
+
+Built using [Express](https://expressjs.com) and [Redux](redux.js.org) on the back end, and [Vue.js](https://vuejs.org/) with [vue-table-component](https://github.com/spatie/vue-table-component) for the client.
 
 Pull requests welcome! Please open an issue on GitHub first (for documentation purposes, at least).
 
