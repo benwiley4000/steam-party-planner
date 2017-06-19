@@ -11,7 +11,7 @@ Pull requests welcome! Please open an issue on GitHub first (for documentation p
 Requires Node.js and npm.
 
 ```bash
-git clone https://github.com/benwiley4000/steam-game-picker.git
+git clone https://github.com/benwiley4000/steam-party-planner.git
 ```
 
 You'll need to copy the `.env.example` file to a new file called `.env` and change the `STEAM_API_KEY` variable to a free Steam Web API key [which you can find here](https://steamcommunity.com/dev/apikey).
