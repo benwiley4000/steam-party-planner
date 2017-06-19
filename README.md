@@ -4,6 +4,8 @@ A web app for tracking a pool of Steam user accounts and compiling data about ga
 
 Built using [Express](https://expressjs.com) and [Redux](http://redux.js.org) on the back end, and [Vue.js](https://vuejs.org/) with [vue-table-component](https://github.com/spatie/vue-table-component) for the client.
 
+Styled with the help of [Bootstrap 4](https://v4-alpha.getbootstrap.com/) and [bootstrap-vue](https://bootstrap-vue.github.io).
+
 Pull requests welcome! Please open an issue on GitHub first (for documentation purposes, at least).
 
 ## Running the app
