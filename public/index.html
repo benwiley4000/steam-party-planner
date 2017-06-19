@@ -20,6 +20,14 @@
       margin-top: 1.4rem;
       text-align: center;
     }
+    .join_message {
+      margin-top: 0.6rem;
+      text-align: center;
+    }
+    .btn.btn-success::after {
+      content: '✔';
+      margin-left: 0.4em;
+    }
     .table-component {
       margin-top: 2rem;
       display: flex;
@@ -52,12 +60,10 @@
     .steam_table .table-component__th--sort-asc::after {
       content: '▲';
       margin-left: 0.4em;
-      color: #fff;
     }
     .steam_table .table-component__th--sort-desc::after {
       content: '▼';
       margin-left: 0.4em;
-      color: #fff;
     }
     .game_thumbnail {
       margin-bottom: 0.6rem;
@@ -72,6 +78,10 @@
     .modal-open .modal {
       display: block;
     }
+    .modal .alert,
+    .modal .confirm {
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -83,6 +93,12 @@
     <div class="tracking_message">
       Tracking
       <a href="" v-on:click="handlePlayersModal">{{ players.length }} players</a>.
+    </div>
+    <div class="join_message">
+    <b-btn
+      :variant="steamNameAdded ? 'success' : 'primary'"
+      @click="$refs.joinModal.show()"
+    >{{ steamNameAdded ? 'Account added' : 'Add your account' }}</b-btn>
     </div>
     <table-component
       :data="games"
@@ -124,6 +140,41 @@
         </h4>
         <img :src="player.avatarfull" title="player.personaname">
       </div>
+    </b-modal>
+    <b-modal
+      ref="joinModal"
+      title="Add your Steam name"
+      ok-title="Submit"
+      close-title="Cancel"
+      @ok="submitName"
+      @shown="clearName"
+    >
+      <p>Enter your Steam community name (not necessarily the same as your login).</p>
+      <form @submit.stop.prevent="submitName">
+        <b-form-input type="text" placeholder="Steam Name" v-model="steamName"></b-form-input>
+      </form>
+      <div v-if="Boolean(nameError)" class="alert alert-danger">{{ nameError }}</div>
+    </b-modal>
+    <b-modal
+      ref="confirmModal"
+      title="Add your Steam name"
+      ok-title="Confirm"
+      close-title="Cancel"
+      @ok="confirmJoin"
+    >
+      <form v-if="Boolean(profileConfirmation)" @submit.stop.prevent="confirmJoin">
+        <h4>
+          {{ profileConfirmation.player.realname }}
+          (<a
+            :href="profileConfirmation.player.profileurl"
+            target="_blank"
+          >{{ profileConfirmation.player.personaname }}</a>)
+        </h4>
+        <img :src="profileConfirmation.player.avatarfull" title="player.personaname">
+        <p class="confirm">Is this you?</p>
+        <div v-if="Boolean(confirmError)" class="alert alert-danger">{{ confirmError }}</div>
+        <div v-if="Boolean(confirmSuccess)" class="alert alert-success">{{ confirmSuccess }}</div>
+      </form>
     </b-modal>
   </section>
 

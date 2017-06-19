@@ -5,7 +5,12 @@ var app = new Vue({
   data: {
     games: [],
     players: [],
-    loadedGame: null
+    loadedGame: null,
+    steamName: '',
+    nameError: '',
+    profileConfirmation: null,
+    confirmError: '',
+    confirmSuccess: ''
   },
 
   computed: {
@@ -32,6 +37,14 @@ var app = new Vue({
     },
     loadedGameHours: function () {
       return this.loadedGame ? this.loadedGame.playtime_in_hours : '';
+    },
+    steamNameAdded: function () {
+      return (
+        localStorage.steamid &&
+        this.players.findIndex(function (player){
+          return player.steamid.toString() === localStorage.steamid.toString();
+        }) !== -1
+      );
     }
   },
 
@@ -40,7 +53,7 @@ var app = new Vue({
       return fetch('/api/owned-games').then(function (res) {
         return res.json();
       }).then(function (data) {
-        this.games = data.games.map(game => {
+        this.games = data.games.map(function (game) {
           game.steam_id_count = game.steam_ids.length;
           game.playtime_in_hours = (game.playtime_forever / 60).toFixed(1);
           return game;
@@ -58,13 +71,51 @@ var app = new Vue({
       e.preventDefault();
       this.$refs.playersModal.show();
     },
+    submitName: function (e) {
+      e.cancel();
+      if (!this.steamName) {
+        this.nameError = 'You must enter a name';
+        return;
+      }
+      this.nameError = '';
+      fetch('/api/players/' + this.steamName, { method: 'POST' }).then(function (res) {
+        return res.json();
+      }).then(function (data) {
+        if (data.error) {
+          this.nameError = data.error;
+          return;
+        }
+        this.profileConfirmation = data;
+        this.$refs.joinModal.hide();
+        this.$refs.confirmModal.show();
+      }.bind(this));
+    },
+    clearName: function () {
+      this.steamName = '';
+      this.nameError = '';
+      this.confirmError = '';
+    },
+    confirmJoin: function (e) {
+      e.cancel();
+      fetch(this.profileConfirmation.confirmationUrl, { method: 'POST' }).then(function (res) {
+        return res.json();
+      }).then(function (data) {
+        if (data.error) {
+          this.confirmError = data.error;
+          return;
+        }
+        this.confirmSuccess = 'Success!';
+        localStorage.steamid = this.profileConfirmation.player.steamid.toString();
+        window.location.assign('/');
+      }.bind(this));
+    }
   }
 });
 
 // TODO: solve bug where updated data can't be received by
 // table component. This makes fetch before mount necessary.
 // https://github.com/spatie/vue-table-component/issues/13
-Promise.all([app.fetchGames(), app.fetchPlayers()]).then(() => {
+Promise.all([app.fetchGames(), app.fetchPlayers()]).then(function () {
   document.getElementById('loading-message').classList.add('hidden');
   document.getElementById('steam-party-planner').classList.remove('hidden');
   app.$mount('#steam-party-planner');
