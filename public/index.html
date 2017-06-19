@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Steam Game Picker</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" src="https://unpkg.com/bootstrap-vue@0.16.1/dist/bootstrap-vue.css">
   <style>
     html,
     body {
@@ -21,8 +22,9 @@
       flex-direction: column;
       align-items: center;
     }
-    .steam_table th {
-      cursor: pointer;
+    #steam-party-planner {
+      /* prevents weird modal issues */
+      max-width: calc(100vw - 20px);
     }
     .steam_table tr th:last-child,
     .steam_table tr td:last-child {
@@ -32,6 +34,7 @@
     .steam_table {
       max-width: 700px;
       margin: 2rem;
+      cursor: pointer;
     }
     .steam_table tr th:nth-child(2) {
       min-width: 215px;
@@ -52,8 +55,15 @@
       margin-left: 0.4em;
       color: #fff;
     }
+    .game_thumbnail {
+      margin-bottom: 0.6rem;
+    }
     .hidden {
       display: none;
+    }
+    /* see: https://github.com/bootstrap-vue/bootstrap-vue/issues/276 */
+    .modal-open .modal {
+      display: block;
     }
   </style>
 </head>
@@ -67,7 +77,7 @@
       :data="games"
       sort-by="steam_id_count"
       sort-order="desc"
-      table-class="table thead-inverse steam_table"
+      table-class="table thead-inverse table-bordered steam_table"
     >
       <table-column show="name" label="Name"></table-column>
       <table-column
@@ -86,12 +96,23 @@
         data-type="numeric"
       ></table-column>
     </table-component>
+    <b-modal ref="gameModal" :title="gameTitle">
+      <img class="game_thumbnail" :src="gameLogo" :title="gameTitle">
+      <div>
+        This game has been played
+        <strong>{{ loadedGameHours }} hours</strong>
+        by
+        <strong>{{ loadedGamePlayers }}</strong>.
+      </div>
+    </b-modal>
   </section>
 
   <script src="https://unpkg.com/promise-polyfill@6.0.2"></script>
   <script src="https://unpkg.com/whatwg-fetch@2.0.3"></script>
   <script src="https://unpkg.com/vue@2.3.4"></script>
   <script src="https://unpkg.com/vue-table-component@1.0.1"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/bootstrap-vue@0.16.1/dist/bootstrap-vue.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
