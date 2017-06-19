@@ -87,7 +87,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/api/players', (req, res) => {
   const { steamIds } = store.getState();
   getPlayerSummaries(steamIds).then(({ players: { player: players } }) => {
-    res.json({ players }).end();
+    res.json({
+      players: players.filter(player => player)
+    }).end();
   }).catch(() => {
     res.status(500).json({ error: 'Server error' }).end();
   });
