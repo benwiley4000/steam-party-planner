@@ -74,7 +74,7 @@ function saveSteamIdPendingConfirmation (steamId, callback) {
     const token = buffer.toString('hex');
     store.dispatch(actions.saveSteamIdPendingConfirmation(steamId, token));
     setTimeout(() => {
-      store.dispatch(action.expireSteamIdPendingConfirmation(token));
+      store.dispatch(actions.expireSteamIdPendingConfirmation(token));
     }, process.env.STEAM_ID_CONFIRMATION_TIMEOUT);
     callback(null, token);
   });
@@ -176,7 +176,7 @@ app.post('/api/confirm-player/:token', (req, res) => {
       res.status(500).json({ error: 'Server error' }).end();
       return;
     }
-    res.status(204).end();
+    res.status(200).json({}).end();
   });
 });
 
@@ -199,7 +199,7 @@ app.delete('/api/players/:vanityName', (req, res) => {
           reject(err);
           return;
         }
-        res.status(204).end();
+        res.status(200).json({}).end();
       });
     });
   }).catch(() => {
