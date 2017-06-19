@@ -52,8 +52,12 @@ var app = new Vue({
         return res.json();
       }).then(function (data) {
         this.players = data.players;
-      });
-    }
+      }.bind(this));
+    },
+    handlePlayersModal: function (e) {
+      e.preventDefault();
+      this.$refs.playersModal.show();
+    },
   }
 });
 

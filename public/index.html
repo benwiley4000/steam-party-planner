@@ -16,6 +16,10 @@
       margin-top: 3rem;
       text-align: center;
     }
+    .tracking_message {
+      margin-top: 1.4rem;
+      text-align: center;
+    }
     .table-component {
       margin-top: 2rem;
       display: flex;
@@ -58,6 +62,9 @@
     .game_thumbnail {
       margin-bottom: 0.6rem;
     }
+    .player_section {
+      padding-bottom: 1rem;
+    }
     .hidden {
       display: none;
     }
@@ -73,6 +80,10 @@
     <h2 class="subtitle">Loading...</h2>
   </section>
   <section id="steam-party-planner" class="hidden">
+    <div class="tracking_message">
+      Tracking
+      <a href="" v-on:click="handlePlayersModal">{{ players.length }} players</a>.
+    </div>
     <table-component
       :data="games"
       sort-by="steam_id_count"
@@ -103,6 +114,15 @@
         <strong>{{ loadedGameHours }} hours</strong>
         by
         <strong>{{ loadedGamePlayers }}</strong>.
+      </div>
+    </b-modal>
+    <b-modal ref="playersModal" title="Players">
+      <div v-for="player in players" class="player_section">
+        <h4>
+          {{ player.realname }}
+          (<a :href="player.profileurl" target="_blank">{{ player.personaname }}</a>)
+        </h4>
+        <img :src="player.avatarfull" title="player.personaname">
       </div>
     </b-modal>
   </section>
