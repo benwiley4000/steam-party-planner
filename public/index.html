@@ -4,23 +4,85 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Steam Game Picker</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+    .title,
+    .subtitle {
+      margin-top: 3rem;
+      text-align: center;
+    }
+    .table-component {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .steam_table th {
+      cursor: pointer;
+    }
+    .steam_table tr th:last-child,
+    .steam_table tr td:last-child {
+      /* playtime_forever column which is only here for utility purposes */
+      display: none;
+    }
+    .steam_table {
+      max-width: 700px;
+      margin: 2rem;
+    }
+    .steam_table tr th:nth-child(2) {
+      min-width: 215px;
+    }
+    .steam_table tr th:nth-child(3) {
+      min-width: 115px;
+    }
+    .steam_table caption {
+      display: none;
+    }
+    .steam_table .table-component__th--sort-asc::after {
+      content: '▲';
+      margin-left: 0.4em;
+      color: #fff;
+    }
+    .steam_table .table-component__th--sort-desc::after {
+      content: '▼';
+      margin-left: 0.4em;
+      color: #fff;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <section id="steam-party-planner">
+  <h1 class="title">Steam Party Planner</h1>
+  <section id="loading-message">
+    <h2 class="subtitle">Loading...</h2>
+  </section>
+  <section id="steam-party-planner" class="hidden">
     <table-component
       :data="games"
       sort-by="steam_id_count"
       sort-order="desc"
+      table-class="table thead-inverse steam_table"
     >
-      <table-column show="name" label="Yeah name"></table-column>
+      <table-column show="name" label="Name"></table-column>
       <table-column
-        show="playtime_forever"
-        label="Total playtime (min.)"
+        show="playtime_in_hours"
+        label="Total playtime (hrs)"
         data-type="numeric"
+        sort-by="playtime_forever"
       ></table-column>
       <table-column
         show="steam_id_count"
         label="Players"
+        data-type="numeric"
+      ></table-column>
+      <table-column
+        show="playtime_forever"
         data-type="numeric"
       ></table-column>
     </table-component>
