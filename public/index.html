@@ -6,7 +6,30 @@
   <title>Steam Game Picker</title>
 </head>
 <body>
+  <section id="steam-party-planner">
+    <table-component
+      :data="games"
+      sort-by="steam_id_count"
+      sort-order="desc"
+    >
+      <table-column show="name" label="Yeah name"></table-column>
+      <table-column
+        show="playtime_forever"
+        label="Total playtime (min.)"
+        data-type="numeric"
+      ></table-column>
+      <table-column
+        show="steam_id_count"
+        label="Players"
+        data-type="numeric"
+      ></table-column>
+    </table-component>
+  </section>
+
+  <script src="https://unpkg.com/promise-polyfill@6.0.2"></script>
   <script src="https://unpkg.com/whatwg-fetch@2.0.3"></script>
+  <script src="https://unpkg.com/vue@2.3.4"></script>
+  <script src="https://unpkg.com/vue-table-component@1.0.1"></script>
   <script src="app.js"></script>
 </body>
 </html>
