@@ -28,12 +28,13 @@ var app = new Vue({
     },
     loadedGamePlayers: function () {
       return this.loadedGame ? this.loadedGame.steam_ids.map(function (id) {
+        console.log()
         for (var i = 0; i < this.players.length; i++) {
           if (this.players[i].steamid === id) {
-            return this.players[i].realname;
+            return this.players[i].realname || this.players[i].personaname;
           }
         }
-      }).join(', ') : '';
+      }.bind(this)).join(', ') : '';
     },
     loadedGameHours: function () {
       return this.loadedGame ? this.loadedGame.playtime_in_hours : '';
